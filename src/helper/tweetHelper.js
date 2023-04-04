@@ -15,7 +15,6 @@ export const addComment = (tweets, tweetId, commentData) => {
 export const createTweet = (userId, text) => ({
   userId,
   text,
-  id: Date.now(),
   createdAt: new Date(),
   comments: []
 });

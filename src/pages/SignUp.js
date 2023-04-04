@@ -1,31 +1,29 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { signup } from "../store/userSlice";
 
 const formFields = [
   {
-    name: "firstName",
+    name: "firstname",
     type: "text",
-    label: "First Name"
+    label: "First Name",
   },
   {
-    name: "lastName",
+    name: "lastname",
     type: "text",
-    label: "Last Name"
+    label: "Last Name",
   },
   {
     name: "email",
     type: "email",
-    label: "Email"
+    label: "Email",
   },
   {
     name: "password",
     type: "password",
-    label: "Password"
+    label: "Password",
   },
-  {
-    name: "confirmPassword",
-    type: "password",
-    label: "Confirm Password"
-  }
 ];
 
 const defaultState = formFields.reduce(
@@ -35,6 +33,8 @@ const defaultState = formFields.reduce(
 
 const SignUp = () => {
   const [credential, setCredentials] = useState({ ...defaultState });
+  const { isLoading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setCredentials({ ...credential, [e.target.name]: e.target.value });
@@ -42,9 +42,11 @@ const SignUp = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    dispatch(signup(credential));
   };
   return (
-    <form className="container">
+    <form className="container w-50 mt-5" onSubmit={handleSubmit}>
+      {error && <div className="alert alert-danger">{error}</div>}
       {formFields.map(({ label, name, type }) => (
         <div key={name} className="mb-3">
           <label className="form-label">{label}</label>
@@ -58,7 +60,14 @@ const SignUp = () => {
           />
         </div>
       ))}
-      <button type="submit" className="btn btn-primary w-100">
+      <Link to="/login" className="btn btn-link">
+        Already a member ?
+      </Link>
+      <button
+        disabled={isLoading}
+        type="submit"
+        className="btn btn-primary w-100"
+      >
         SignUp
       </button>
     </form>

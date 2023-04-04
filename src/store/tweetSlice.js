@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { getAllTweets } from "../database/tweetsOperations";
 import { addComment, createTweet } from "../helper/tweetHelper";
-import store from "./store";
 
 const initialState = {
-  tweets: []
+  tweets: [],
+  isLoading: false,
 };
 
 const tweetSlice = createSlice({
@@ -13,33 +14,34 @@ const tweetSlice = createSlice({
     fetchTweets: (state, action) => {
       state.tweets = [...action.payload];
     },
-    addNewTweet: (state, { text }) => {
-      state.tweets = [
-        ...state.tweets,
-        createTweet(text, store.getState().user.userId)
-      ];
+    addNewTweet: (state, action) => {
+      const { text, userId } = action.payload;
+      state.tweets = [...state.tweets, createTweet(text, userId)];
     },
-    likeDislikeTweet: (state, { id }) => {
-      const tweetIndex = state.tweets.findIndex((item) => item.id === id);
-      state.tweets[tweetIndex].likedBy = [
-        ...state.tweets[tweetIndex].likedBy,
-        store.getState().user.userId
-      ];
+    setIsLoading: (state, action) => {
+      state.isLoading = action.payload;
     },
-    addCommentOnTweet: (state, { tweetId, text }) => {
+    addCommentOnTweet: (state, { tweetId, text, userId }) => {
       state.tweets = addComment(state.tweets, tweetId, {
         text,
-        userId: store.getState().user.userId
+        userId,
       });
-    }
-  }
+    },
+  },
 });
 
 export const {
   likeDislikeTweet,
   fetchTweets,
   addNewTweet,
-  addCommentOnTweet
+  addCommentOnTweet,
+  setIsLoading,
 } = tweetSlice.actions;
 
+export const getTweets = () => async (dispatch) => {
+  dispatch(setIsLoading(true));
+  const data = await getAllTweets();
+  dispatch(fetchTweets(data || []));
+  dispatch(setIsLoading(false));
+};
 export default tweetSlice.reducer;

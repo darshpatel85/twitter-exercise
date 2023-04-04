@@ -1,41 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import CreateNewTweet from "../components/CreateTweet";
+import Loader from "../components/Loader";
 import TweetUI from "../components/TweetUI";
-import { getAllTweets } from "../database/tweetsOperations";
-import { fetchTweets } from "../store/tweetSlice";
+import { getTweets } from "../store/tweetSlice";
 
 const Home = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const tweets = useSelector((state) => state?.tweet?.tweets || []);
-  console.log(tweets);
+  const { tweets, isLoading } = useSelector((state) => state?.tweet || []);
 
-  const getTweets = async () => {
-    setIsLoading(true);
-    const data = await getAllTweets();
-    dispatch(fetchTweets(data || []));
-    setIsLoading(false);
-  };
   useEffect(() => {
-    getTweets();
+    dispatch(getTweets());
   }, []);
-  return isLoading ? (
-    <h1>Loading</h1>
-  ) : (
+
+  return (
     <div className="container">
       <div className="row">
         <div className="col-lg-8 mx-auto">
           <div className="card mb-3">
             <div className="card-body">
-              <h5 className="card-title">Latest Tweets</h5>
+              <h5 className="card-title">Tweets</h5>
+              <CreateNewTweet />
               <hr />
-              <div className="row">
-                <div className="col-md-12">
-                  {tweets.map((item) => (
-                    <TweetUI {...item} />
-                  ))}
+              {isLoading ? (
+                <Loader />
+              ) : (
+                <div className="row">
+                  <div className="col-md-12">
+                    {tweets.map((item) => (
+                      <TweetUI key={item.id} {...item} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
